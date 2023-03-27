@@ -16,8 +16,52 @@ const [form, setForm] = useState({
 const [generatingImg, setGeneratingImg] = useState(false);
 const [loading, setLoading] = useState(false);
 
-function generateImage() {}
-function handleSubmit() {}
+async function generateImage() {
+    if(form.prompt) {
+        try{
+            setGeneratingImg(true);
+            const response = await fetch('http://localhost:8080/api/v1/dalle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: form.prompt }),
+            });
+
+            const data = await response.json();
+
+        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}`});
+        } catch (error) {
+            alert(error);
+        } finally {
+            setGeneratingImg(false);
+        }
+    } else {
+        alert('Please enter a prompt');
+    }
+}
+async function handleSubmit(event) {
+    event.preventDefault();
+  if(form.prompt && form.photo) {
+    try {
+        const response = await fetch('http://localhost:8080/api/v1/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({...form})
+        });
+        await response.json();
+        navigate('/');
+    } catch (error) {
+        alert(error);        
+    } finally {
+        setLoading(false);
+    }
+  } else {
+    alert('Please enter a prompt and generate an image');
+  }
+}
 function handleChange(event) {
 setForm({ ...form, [event.target.name]: event.target.value })
 }
@@ -43,15 +87,16 @@ setForm({ ...form, prompt: randomPrompt })
                 type="text"
                 name="name"
                 placeholder="John Doe"
-                value={form.data}
+                value={form.name}
                 handleChange={handleChange}
                 />
                 <FormField 
                 labelName="Prompt"
                 type="text"
-                name="Prompt"
+                name="prompt"
                 placeholder="a painting of a fox in the style of Starry Night"
                 value={form.prompt}
+                handleChange={handleChange}
                 isSurpriseMe
                 handleSurpriseMe={handleSurpriseMe}
                 />
