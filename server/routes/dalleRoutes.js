@@ -23,7 +23,7 @@ router.route('/').post(async (req, res) => {
         const aiResponse = await openai.createImage({
             prompt,
             n: 1,
-            size: '1024x1024',
+            size: '1024x1024',//default size of the images
             response_format: 'b64_json',
         });
 
@@ -35,4 +35,4 @@ router.route('/').post(async (req, res) => {
     }
 });
 
-export default router ;
+export default router;
